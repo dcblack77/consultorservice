@@ -18,12 +18,59 @@ const db = mysql.createConnection({
 
 app.post('/consulta', (req, res) => {
 	const consult = req.body.consult;
-	db.query(consult, (err, articulo) => {
-		if (err) res.json({ok:false, err});
-		res.json({
-			ok: true,
-			articulo
-		});
+
+	db.query(`${consult.queries.alternativo} ${consult.code}`, (err, alternativo) => {
+
+		if (err) {
+			res.json({
+				ok:false,
+				err
+			});
+		} else {
+			if (alternativo < 1) {
+				db.query(`${consult.queries.articulo} ${consult.code}`, (err, articulo) => {
+					if (err) {
+						res.json({
+							ok:false,
+							err
+						});
+					} else {
+						if (articulo < 1) {
+							res.json({
+								ok: false,
+								articulo: 'no found'
+							})
+						} else {
+							res.json({
+								ok: true,
+								articulo
+							});
+						}
+					}
+				})
+			} else {
+				db.query(`${consult.queries.articulo} ${alternativo[0].codigo}`, (err, articulo) => {
+					if (err) {
+						res.json({
+							ok:false,
+							err
+						});
+					} else {
+						if (articulo < 1) {
+							res.json({
+								ok: false,
+								articulo: 'no found'
+							})
+						} else {
+							res.json({
+								ok: true,
+								articulo
+							});
+						}
+					}
+				})
+			}
+		}
 	});
 });
 
